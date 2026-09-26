@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Squid Game — WhatsApp Arena</title>
+<style>
+:root{
+ --pink:#ff2f78;--pink2:#ff6a9b;--green:#21e58b;--red:#ff3154;--dark:#07070b;
+ --card:rgba(12,12,20,.82);--line:rgba(255,255,255,.12);--text:#f7f7fb;--muted:#a9a9b8;
+}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;background:#050509;color:var(--text)}
+body{overflow-x:hidden}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.screen{min-height:100vh;display:none;position:relative;padding:18px 15px 95px;overflow:hidden}
+.screen.active{display:block}
+.screen:before,.screen:after{content:"";position:absolute;inset:0;pointer-events:none}
+.screen:before{background:radial-gradient(circle at 50% 20%,rgba(255,47,120,.18),transparent 42%),linear-gradient(135deg,rgba(0,0,0,.45),rgba(0,0,0,.82))}
+.screen>*{position:relative;z-index:2}
+.bg-home{background:linear-gradient(135deg,#160914,#090c16 55%,#130713)}
+.bg-home:after{opacity:.18;background:repeating-linear-gradient(135deg,transparent 0 45px,#fff 46px 47px,transparent 48px 92px)}
+.bg-register{background:radial-gradient(circle at 50% 30%,#3b1630,#0b0911 55%,#030305)}
+.bg-account{background:linear-gradient(160deg,#0a0b15,#15111c 50%,#050507)}
+.bg-games{background:radial-gradient(circle at 50% 10%,#31132b,#090a12 52%,#030306)}
+.bg-sun{background:linear-gradient(180deg,#5b8eb0 0%,#8fb7bd 35%,#6e7e65 36%,#263426 100%)}
+.bg-dalgona{background:radial-gradient(circle at 50% 15%,#b77a45,#38251d 40%,#0d0908 100%)}
+.bg-memory{background:radial-gradient(circle,#24264c,#0b0b17 55%,#020206)}
+.bg-lying{background:radial-gradient(circle at 50% 35%,#3c172d,#0a0810 65%)}
+.bg-riddle{background:radial-gradient(circle at 50% 20%,#19364b,#090c13 58%,#020305)}
+.bg-duel{background:radial-gradient(circle at 50% 50%,#4c142b,#110811 50%,#020204)}
+.bg-choice{background:linear-gradient(145deg,#171b34,#080a14 60%,#160c1b)}
+.bg-secret{background:radial-gradient(circle at 50% 20%,#152d2c,#070c0d 58%,#020304)}
+.bg-bridge{background:linear-gradient(180deg,#111827,#080b13 50%,#020205)}
+.bg-final{background:radial-gradient(circle at 50% 35%,#321026,#09070c 50%,#000)}
+.bg-master{background:radial-gradient(circle at 50% 0%,#27142d,#09090f 55%,#020204)}
+.header{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:900px;margin:0 auto 18px}
+.logo{font-weight:900;letter-spacing:3px;font-size:16px}.logo span{color:var(--pink)}
+.pill{border:1px solid var(--line);background:rgba(0,0,0,.4);padding:8px 11px;border-radius:99px;font-size:12px;color:#ddd}
+.hero{max-width:900px;margin:8vh auto 0;text-align:center}
+.badge{display:inline-block;border:1px solid rgba(255,47,120,.5);background:rgba(255,47,120,.1);padding:7px 12px;border-radius:99px;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(38px,12vw,78px);line-height:.9;margin:18px 0 12px;letter-spacing:-3px;text-shadow:0 8px 30px #000}
+h2{font-size:28px;margin:10px 0}.sub{color:#c1c1cd;line-height:1.55;max-width:650px;margin:0 auto 25px}
+.card{max-width:900px;margin:14px auto;padding:20px;border:1px solid var(--line);background:var(--card);border-radius:22px;backdrop-filter:blur(14px);box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.btn{border:0;border-radius:14px;padding:13px 16px;color:white;background:linear-gradient(135deg,#f02d70,#a81e58);font-weight:800;box-shadow:0 10px 25px rgba(255,47,120,.18)}
+.btn.secondary{background:#191923;border:1px solid var(--line);box-shadow:none}.btn.green{background:linear-gradient(135deg,#16bf78,#087e52)}.btn.red{background:linear-gradient(135deg,#ff3154,#9c1730)}
+.btn:active{transform:scale(.98)}
+.bigbtn{width:100%;font-size:16px;padding:16px;margin-top:9px}
+.form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:12px;color:#aaa}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);background:#090911;color:#fff;padding:13px;border-radius:12px;outline:none}.field textarea{min-height:90px;resize:vertical}
+.nav{position:fixed;z-index:20;left:10px;right:10px;bottom:10px;max-width:900px;margin:auto;display:flex;gap:7px;padding:8px;background:rgba(5,5,10,.9);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(15px)}
+.nav button{flex:1;border:0;background:transparent;color:#aaa;padding:9px 4px;font-size:10px}.nav button b{display:block;font-size:18px;margin-bottom:3px}.nav button.active{color:#fff}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{padding:12px;border-radius:14px;background:rgba(255,255,255,.05);text-align:center}.stat strong{display:block;font-size:22px}.stat small{color:#999}
+.game-list{display:grid;gap:10px}.game{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);background:rgba(0,0,0,.35);border-radius:16px}.game .ico{font-size:28px}.game .info{flex:1}.game .info b{display:block}.game .info small{color:#999}.locked{opacity:.55}
+.game-area{text-align:center;max-width:760px;margin:0 auto}.timer{font-size:54px;font-weight:900;margin:15px 0;text-shadow:0 0 25px rgba(255,255,255,.2)}.phase{font-size:18px;font-weight:900;letter-spacing:2px;margin:10px}.phase.green{color:var(--green)}.phase.red{color:var(--red)}
+.arena{min-height:260px;border:1px solid rgba(255,255,255,.15);border-radius:22px;background:rgba(0,0,0,.3);display:grid;place-items:center;padding:22px;overflow:hidden;position:relative}
+.soldier{font-size:75px;filter:drop-shadow(0 10px 20px #000)}.instruction{font-size:17px;line-height:1.5}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}.choice{padding:22px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:#fff}
+.question{font-size:21px;font-weight:800;line-height:1.35;margin:10px 0 18px}
+.answer{display:grid;gap:9px}.answer button{padding:14px;border-radius:12px;border:1px solid var(--line);background:#11111b;color:#fff;text-align:left}
+.result{padding:15px;border-radius:14px;margin-top:12px;background:rgba(255,255,255,.06)}
+.admin-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.admin-row>*{flex:1;min-width:120px}
+.player-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:12px;border-bottom:1px solid var(--line)}.player-row:last-child{border:0}
+.tag{font-size:10px;padding:5px 8px;border-radius:99px;background:#183b2d;color:#73f3b4}.tag.dead{background:#451522;color:#ff8196}
+.notice{padding:11px;border-left:3px solid var(--pink);background:rgba(255,47,120,.08);border-radius:8px;color:#ddd}
+.hidden{display:none!important}.muted{color:#999}.center{text-align:center}
+.toast{position:fixed;z-index:50;left:50%;bottom:88px;transform:translateX(-50%);background:#111;color:#fff;border:1px solid var(--line);padding:11px 16px;border-radius:12px;display:none}
+.toast.show{display:block}
+@media(min-width:700px){.screen{padding-left:28px;padding-right:28px}.hero{margin-top:13vh}}
+</style>
+</head>
+<body>
+
+<section id="home" class="screen bg-home active">
+ <div class="header"><div class="logo">SQUID <span>ARENA</span></div><div class="pill">SAISON 01</div></div>
+ <div class="hero">
+  <span class="badge">WhatsApp Arena</span>
+  <h1>LE JEU<br>COMMENCE.</h1>
+  <p class="sub">Entre dans une arène virtuelle inspirée des thrillers de survie. Dix épreuves. Des décisions. Des points. Une seule mission : rester en jeu.</p>
+  <div class="card">
+   <div class="stats"><div class="stat"><strong id="homeActive">0</strong><small>actifs</small></div><div class="stat"><strong id="homeDead">0</strong><small>éliminés</small></div><div class="stat"><strong>10</strong><small>jeux</small></div><div class="stat"><strong>01</strong><small>saison</small></div></div>
+   <button class="btn bigbtn" onclick="show('register')">🎟️ ENTRER DANS L'ARÈNE</button>
+   <button class="btn secondary bigbtn" onclick="show('rules')">📜 Voir les règles</button>
+  </div>
+ </div>
+</section>
+
+<section id="register" class="screen bg-register">
+ <div class="header"><div class="logo">INSCRIPTION</div><button class="pill" onclick="show('home')">← Retour</button></div>
+ <div class="card">
+  <span class="badge">Joueur</span><h2>Crée ton dossier</h2><p class="muted">Tes informations servent uniquement à ton profil de participant.</p>
+  <form class="form" onsubmit="register(event)">
+   <div class="field"><label>Pseudo / nom</label><input id="regName" required maxlength="25" placeholder="Ex : Player 067"></div>
+   <div class="field"><label>Âge</label><input id="regAge" required type="number" min="10" max="99" placeholder="18"></div>
+   <div class="field"><label>Pays</label><input id="regCountry" required placeholder="Guinée"></div>
+   <div class="field"><label>Numéro WhatsApp</label><input id="regWhats" required placeholder="+224 ..."></div>
+   <div class="field"><label>Pourquoi veux-tu participer ?</label><textarea id="regWhy" required placeholder="Ta motivation..."></textarea></div>
+   <button class="btn bigbtn">🎟️ VALIDER L'INSCRIPTION</button>
+  </form>
+ </div>
+</section>
+
+<section id="account" class="screen bg-account">
+ <div class="header"><div class="logo">MON DOSSIER</div><button class="pill" onclick="show('games')">🎮 Jeux</button></div>
+ <div class="card">
+  <span class="badge">Participant</span><h2 id="accName">—</h2><p id="accStatus" class="notice">—</p>
+  <div class="stats">
+   <div class="stat"><strong id="accNum">—</strong><small>joueur</small></div><div class="stat"><strong id="accLives">3</strong><small>vies</small></div><div class="stat"><strong id="accPoints">0</strong><small>points</small></div><div class="stat"><strong id="accWins">0</strong><small>victoires</small></div>
+  </div>
+  <div style="height:10px"></div>
+  <button class="btn bigbtn" onclick="show('games')">⚡ ACCÉDER AUX ÉPREUVES</button>
+ </div>
+</section>
+
+<section id="games" class="screen bg-games">
+ <div class="header"><div class="logo">LES ÉPREUVES</div><div class="pill">10 JEUX</div></div>
+ <div class="card"><div class="notice">🟢 <b id="gameActiveCount">0</b> joueurs encore actifs · 🔴 <b id="gameDeadCount">0</b> éliminés</div></div>
+ <div class="game-list" id="gameList"></div>
+</section>
+
+<section id="game" class="screen">
+ <div class="header"><div class="logo" id="gameTitle">ÉPREUVE</div><button class="pill" onclick="leaveGame()">✕ Quitter</button></div>
+ <div class="game-area" id="gameContent"></div>
+</section>
+
+<section id="rules" class="screen bg-memory">
+ <div class="header"><div class="logo">RÈGLEMENT</div><button class="pill" onclick="show('home')">← Retour</button></div>
+ <div class="card">
+  <h2>📜 Les règles de l'Arène</h2>
+  <p>• Chaque participant reçoit un numéro et commence avec <b>3 vies</b>.</p>
+  <p>• Les épreuves peuvent faire gagner des points ou retirer une vie.</p>
+  <p>• Une vie à 0 signifie l'élimination virtuelle du participant.</p>
+  <p>• Le Maître du Jeu peut ouvrir/fermer une épreuve et effectuer une élimination manuelle.</p>
+  <p>• Les résultats affichés sur cette version sont stockés dans le navigateur. Pour une vraie partie entre plusieurs téléphones, il faudra connecter Supabase.</p>
+  <button class="btn bigbtn" onclick="show('register')">🎟️ Participer</button>
+ </div>
+</section>
+
+<section id="master" class="screen bg-master">
+ <div class="header"><div class="logo">🎭 MAÎTRE DU JEU</div><button class="pill" onclick="show('home')">Accueil</button></div>
+ <div id="masterLogin" class="card">
+  <h2>Accès contrôleur</h2><p class="muted">Prototype local : mot de passe de démonstration <b>ARENA-MASTER</b></p>
+  <input id="masterPass" class="field" style="padding:13px;border-radius:12px;background:#090911;border:1px solid var(--line);color:white" placeholder="Mot de passe">
+  <button class="btn bigbtn" onclick="loginMaster()">🔐 OUVRIR LE CONTRÔLE</button>
+ </div>
+ <div id="masterPanel" class="hidden">
+  <div class="card"><h2>Contrôle de l'épreuve</h2><div class="admin-row"><select id="masterGame"></select><button class="btn" onclick="masterOpenGame()">OUVRIR</button><button class="btn secondary" onclick="masterClose()">FERMER</button></div><p id="masterCurrent" class="muted"></p></div>
+  <div class="card"><h2>📢 Annonce</h2><div class="admin-row"><input id="announcement" placeholder="Message aux joueurs"><button class="btn" onclick="sendAnnouncement()">ENVOYER</button></div></div>
+  <div class="card"><h2>👥 Participants</h2><div id="players"></div></div>
+ </div>
+</section>
+
+<div class="nav">
+ <button onclick="show('home')" id="navHome"><b>⌂</b>Accueil</button>
+ <button onclick="show('account')" id="navAccount"><b>◉</b>Profil</button>
+ <button onclick="show('games')" id="navGames"><b>⚡</b>Jeux</button>
+ <button onclick="show('master')" id="navMaster"><b>♟</b>Maître</button>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL="https://ntvviqcwvzaghhgerxys.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_2wsVq1uqAItCxmrQnCWtDw_io7VcwEQ";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let realtimeChannel=null;
+const games=[
+{id:1,icon:"🌳",name:"1, 2, 3 Soleil",desc:"5 phases · 60 secondes",bg:"bg-sun"},
+{id:2,icon:"🍪",name:"Dalgona",desc:"Découpe la forme sans la casser",bg:"bg-dalgona"},
+{id:3,icon:"🧠",name:"Memory",desc:"Retrouve les paires",bg:"bg-memory"},
+{id:4,icon:"🎭",name:"Qui est menteur ?",desc:"Détecte la bonne déclaration",bg:"bg-lying"},
+{id:5,icon:"🧩",name:"Énigme",desc:"Réponds avant la fin du temps",bg:"bg-riddle"},
+{id:6,icon:"⚔️",name:"Duel",desc:"Affronte un adversaire",bg:"bg-duel"},
+{id:7,icon:"🎲",name:"Jeu du choix",desc:"Tes décisions changent le résultat",bg:"bg-choice"},
+{id:8,icon:"🕵️",name:"Mission secrète",desc:"Accomplis ton objectif",bg:"bg-secret"},
+{id:9,icon:"🌉",name:"Le Pont",desc:"Avance sans choisir le mauvais panneau",bg:"bg-bridge"},
+{id:10,icon:"👑",name:"Final",desc:"Dernière épreuve de la saison",bg:"bg-final"}
+];
+let state={players:[],currentPlayerId:null,announcement:"",currentGame:null,masterOpen:false};
+let playerLocalId=localStorage.getItem("arenaPlayerId")||null;
+function saveLocal(){localStorage.setItem("arenaPlayerId",playerLocalId||"");}
+function toast(t){let e=document.getElementById("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
+function show(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ let n={home:"navHome",account:"navAccount",games:"navGames"}[id];if(n)document.getElementById(n).classList.add("active");
+ refresh();
+}
+function mapPlayer(p){return {id:p.id,num:String(p.player_number).padStart(3,"0"),name:p.pseudo,age:p.age,country:p.country,whats:p.whatsapp,why:p.why_participate,lives:p.lives??3,points:p.points??0,wins:p.wins??0,games:p.games_played??0,active:p.active!==false};}
+async function loadPlayers(){
+ const {data,error}=await sb.from("players").select("*").order("player_number",{ascending:true});
+ if(error){console.error(error);toast("⚠️ Connexion Supabase impossible");return;}
+ state.players=(data||[]).map(mapPlayer);
+ if(playerLocalId && state.players.some(p=>p.id===playerLocalId)) state.currentPlayerId=playerLocalId;
+ else if(state.players[0] && !state.currentPlayerId) state.currentPlayerId=state.players[0].id;
+ refresh();
+}
+async function loadControl(){
+ const {data,error}=await sb.from("master_control").select("*").order("updated_at",{ascending:false}).limit(1).maybeSingle();
+ if(!error&&data){state.currentGame=data.current_game_id??null;}
+ const {data:a}=await sb.from("announcements").select("message,created_at").order("created_at",{ascending:false}).limit(1).maybeSingle();
+ if(a)state.announcement=a.message||"";
+ refresh();
+}
+function subscribeRealtime(){
+ if(realtimeChannel)sb.removeChannel(realtimeChannel);
+ realtimeChannel=sb.channel("arena-live")
+  .on("postgres_changes",{event:"*",schema:"public",table:"players"},()=>loadPlayers())
+  .on("postgres_changes",{event:"*",schema:"public",table:"master_control"},()=>loadControl())
+  .on("postgres_changes",{event:"*",schema:"public",table:"announcements"},()=>loadControl())
+  .subscribe();
+}
+async function register(e){
+ e.preventDefault();
+ const name=document.getElementById("regName").value.trim();
+ const age=Number(document.getElementById("regAge").value);
+ const country=document.getElementById("regCountry").value.trim();
+ const whats=document.getElementById("regWhats").value.trim();
+ const why=document.getElementById("regWhy").value.trim();
+ if(!name||!age||!country||!whats||!why)return;
+ const {data:maxRow}=await sb.from("players").select("player_number").order("player_number",{ascending:false}).limit(1).maybeSingle();
+ const nextNum=(maxRow?.player_number||0)+1;
+ const {data,error}=await sb.from("players").insert({player_number:nextNum,pseudo:name,age,country,whatsapp:whats,why_participate:why,lives:3,points:0,wins:0,games_played:0,active:true}).select().single();
+ if(error){console.error(error);toast("❌ Inscription impossible : "+(error.message||"erreur"));return;}
+ playerLocalId=data.id;saveLocal();state.currentPlayerId=data.id;
+ await loadPlayers();toast("🎟️ INSCRIPTION VALIDÉE — Joueur "+String(data.player_number).padStart(3,"0"));show("account");
+}
+function current(){return state.players.find(p=>p.id===state.currentPlayerId)||null}
+function refresh(){
+ let active=state.players.filter(p=>p.active).length,dead=state.players.filter(p=>!p.active).length;
+ ["homeActive","gameActiveCount"].forEach(x=>{let e=document.getElementById(x);if(e)e.textContent=active});
+ ["homeDead","gameDeadCount"].forEach(x=>{let e=document.getElementById(x);if(e)e.textContent=dead});
+ let p=current();
+ if(p){
+  accName.textContent=p.name;accNum.textContent=p.num;accLives.textContent=p.lives;accPoints.textContent=p.points;accWins.textContent=p.wins;
+  accStatus.textContent=p.active?"🟢 PARTICIPANT ACTIF":"🔴 PARTICIPANT ÉLIMINÉ";
+  accStatus.style.borderLeftColor=p.active?"var(--green)":"var(--red)";
+ }
+ renderGames();renderPlayers();renderMasterSelect();
+}
+function renderGames(){
+ let box=document.getElementById("gameList");if(!box)return;
+ box.innerHTML=games.map(g=>`<div class="game"><div class="ico">${g.icon}</div><div class="info"><b>${g.name}</b><small>${g.desc}</small></div><button class="btn" onclick="startGame(${g.id})">JOUER</button></div>`).join("");
+}
+function startGame(id){
+ let p=current();if(!p){show("register");return} if(!p.active){toast("🔴 Tu es éliminé.");return}
+ let g=games.find(x=>x.id===id);state.currentGame=id;
+ document.getElementById("game").className="screen "+g.bg+" active";document.getElementById("gameTitle").textContent=g.icon+" "+g.name;
+ renderGame(g);
+}
+function leaveGame(){state.currentGame=null;show("games")}
+async function recordResult(kind,reason,points=0){
+ let p=current();if(!p)return;
+ const payload={player_id:p.id,game_id:state.currentGame,reason:reason||kind,points:points||0};
+ const {error}=await sb.from(kind==="win"?"scores":"eliminations").insert(payload);
+ if(error){console.error(error);toast("⚠️ Résultat non synchronisé");return false}
+ await loadPlayers();return true;
+}
+async function lose(reason="Échec de l'épreuve"){
+ let p=current();if(!p)return;
+ let ok=await recordResult("lose",reason,0); if(!ok)return;
+ toast(p.lives-1>0?"🔴 "+reason+" — 1 vie perdue":"🔴 ÉLIMINATION — "+reason);
+ setTimeout(()=>show(p.lives-1>0?"account":"home"),700);
+}
+async function win(points=10){
+ let p=current();if(!p)return;
+ let ok=await recordResult("win","Épreuve réussie",points); if(!ok)return;
+ toast("🟢 Épreuve réussie +"+points+" points");setTimeout(()=>show("account"),700);
+}
+function renderGame(g){
+ let c=document.getElementById("gameContent");
+ if(g.id===1)return renderSun(c);if(g.id===2)return renderDalgona(c);if(g.id===3)return renderMemory(c);if(g.id===4)return renderLiar(c);if(g.id===5)return renderRiddle(c);if(g.id===6)return renderDuel(c);if(g.id===7)return renderChoice(c);if(g.id===8)return renderSecret(c);if(g.id===9)return renderBridge(c);if(g.id===10)return renderFinal(c);
+}
+function renderSun(c){
+ c.innerHTML=`<div class="badge">ÉPREUVE 01</div><h2>🌳 1, 2, 3 Soleil</h2><div id="sunPhase" class="phase green">🟢 VERT — TU PEUX ÉCRIRE</div><div id="sunTimer" class="timer">60</div><div class="arena"><div><div class="soldier">🧍</div><p class="instruction" id="sunText">Écris exactement la phrase affichée avant que le feu passe au rouge.</p><div class="notice"><b id="sunPhrase">JE RESTE DANS L'ARÈNE</b></div><input id="sunInput" class="field" style="margin-top:12px;padding:14px;border-radius:12px;background:#090911;border:1px solid var(--line);color:#fff;width:100%" placeholder="Tape la phrase ici"></div></div><button class="btn bigbtn" onclick="sunSubmit()">VALIDER</button><div id="sunResult"></div>`;
+ let phrases=["JE RESTE DANS L'ARÈNE","LE SILENCE ME PROTÈGE","JE N'AI PAS PEUR","LA PARTIE CONTINUE","JE DOIS RESTER CONCENTRÉ"];let phase=0,time=60,green=true,ended=false;
+ window.sunSubmit=()=>{if(ended)return;let input=document.getElementById("sunInput").value.trim(),target=phrases[phase];if(!green){ended=true;lose("Tu as écrit pendant le rouge");return}if(input!==target){ended=true;lose("Phrase incorrecte");return}phase++;document.getElementById("sunInput").value="";if(phase>=phrases.length){ended=true;win(30);return}document.getElementById("sunPhrase").textContent=phrases[phase];toast("Phase suivante !")};
+ let timer=setInterval(()=>{if(ended){clearInterval(timer);return}time--;document.getElementById("sunTimer").textContent=time;green=!green;let ph=document.getElementById("sunPhase");ph.className="phase "+(green?"green":"red");ph.textContent=green?"🟢 VERT — TU PEUX ÉCRIRE":"🔴 ROUGE — STOP !";document.getElementById("sunInput").disabled=!green;if(time<=0){clearInterval(timer);ended=true;lose("Temps écoulé")}},1000);
+}
+function renderDalgona(c){let shapes=["⭐","☂️","🔺","⭕"],target=shapes[Math.floor(Math.random()*shapes.length)];c.innerHTML=`<div class="badge">ÉPREUVE 02</div><h2>🍪 Dalgona</h2><p class="sub">Choisis la forme que tu dois extraire sans la casser.</p><div class="arena"><div style="font-size:100px">🍪</div></div><h2>${target}</h2><div class="choice-grid">${shapes.map(x=>`<button class="choice" onclick="dalgona('${x}','${target}')">${x}</button>`).join("")}</div><div id="dalgonaResult"></div>`;window.dalgona=(x,t)=>x===t?win(20):lose("La mauvaise forme a été choisie")}
+function renderMemory(c){let vals=["🍎","⭐","🐙","🎭"],cards=[...vals,...vals].sort(()=>Math.random()-.5),open=[],matched=0;c.innerHTML=`<div class="badge">ÉPREUVE 03</div><h2>🧠 Memory</h2><p class="sub">Retrouve toutes les paires. Chaque erreur augmente la pression.</p><div class="choice-grid" id="memGrid">${cards.map((x,i)=>`<button class="choice" id="m${i}" onclick="memPick(${i})">?</button>`).join("")}</div>`;window.memPick=(i)=>{if(open.includes(i)||document.getElementById("m"+i).textContent!=="?")return;open.push(i);document.getElementById("m"+i).textContent=cards[i];if(open.length===2){let[a,b]=open;if(cards[a]===cards[b]){matched++;open=[];if(matched===vals.length)win(25)}else{setTimeout(()=>{document.getElementById("m"+a).textContent="?";document.getElementById("m"+b).textContent="?";open=[]},550)}}}}
+function renderLiar(c){let sets=[["Je peux parler aux poissons.","Je dors toujours avec une lampe.","J'ai déjà gagné une compétition.","Je peux retenir ma respiration 10 minutes."],["Je n'ai jamais mangé de chocolat.","Je sais résoudre un Rubik's Cube.","Je déteste les jeux.","J'ai déjà menti aujourd'hui."]],s=sets[Math.floor(Math.random()*sets.length)],liar=Math.floor(Math.random()*4);c.innerHTML=`<div class="badge">ÉPREUVE 04</div><h2>🎭 Qui est menteur ?</h2><p class="sub">Une seule déclaration est le mensonge. Trouve-la.</p><div class="answer">${s.map((x,i)=>`<button onclick="liarPick(${i},${liar})">${i+1}. ${x}</button>`).join("")}</div><div id="liarRes"></div>`;window.liarPick=(i,l)=>i===l?win(20):lose("Mauvais menteur")}
+function renderRiddle(c){let qs=[{q:"Je grandis sans être vivant. Je n'ai pas de poumons mais j'ai besoin d'air. Qui suis-je ?",a:"feu"},{q:"Plus tu en prends, plus tu en laisses derrière toi. Qu'est-ce que c'est ?",a:"pas"}],x=qs[Math.floor(Math.random()*qs.length)];c.innerHTML=`<div class="badge">ÉPREUVE 05</div><h2>🧩 Énigme</h2><div class="arena"><div><div class="question">${x.q}</div><input id="riddleAns" class="field" style="padding:14px;border-radius:12px;background:#090911;border:1px solid var(--line);color:#fff;width:100%" placeholder="Ta réponse"></div></div><button class="btn bigbtn" onclick="riddleCheck('${x.a}')">RÉPONDRE</button>`;window.riddleCheck=a=>document.getElementById("riddleAns").value.trim().toLowerCase().includes(a)?win(20):lose("Mauvaise réponse")}
+function renderDuel(c){let choices=["✊","✋","✌️"];c.innerHTML=`<div class="badge">ÉPREUVE 06</div><h2>⚔️ Duel</h2><p class="sub">Choisis ton symbole. L'arène répondra aléatoirement.</p><div class="choice-grid">${choices.map(x=>`<button class="choice" onclick="duel('${x}')">${x}</button>`).join("")}</div><div id="duelRes"></div>`;window.duel=x=>{let y=choices[Math.floor(Math.random()*3)],winx=(x==="✊"&&y==="✌️")||(x==="✋"&&y==="✊")||(x==="✌️"&&y==="✋");if(x===y){toast("⚖️ Égalité, rejoue");return}winx?win(20):lose("Duel perdu")}}
+function renderChoice(c){c.innerHTML=`<div class="badge">ÉPREUVE 07</div><h2>🎲 Le Choix</h2><p class="sub">Tu dois choisir sans connaître la conséquence.</p><div class="choice-grid"><button class="choice" onclick="choice(1)">🚪 PORTE ROUGE</button><button class="choice" onclick="choice(2)">🚪 PORTE BLEUE</button><button class="choice" onclick="choice(3)">🕳️ ESCALIER</button><button class="choice" onclick="choice(4)">⏳ ATTENDRE</button></div><div id="choiceRes"></div>`;window.choice=x=>Math.random()>.45?win(15):lose("Ton choix t'a coûté une vie")}
+function renderSecret(c){let missions=["Écris le mot SILENCE trois fois.","Tape ARENA sans faute.","Écris exactement : JE CONTINUE.","Tape le nom de ton joueur."],m=missions[Math.floor(Math.random()*missions.length)];c.innerHTML=`<div class="badge">ÉPREUVE 08</div><h2>🕵️ Mission secrète</h2><div class="arena"><div><p class="question">${m}</p><input id="secretInput" class="field" style="padding:14px;border-radius:12px;background:#090911;border:1px solid var(--line);color:#fff;width:100%" placeholder="Réponse"></div></div><button class="btn bigbtn" onclick="secretCheck()">TERMINER</button>`;window.secretCheck=()=>{let v=document.getElementById("secretInput").value.trim().toUpperCase(),ok=m.includes("SILENCE")?v==="SILENCE SILENCE SILENCE":m.includes("ARENA")?v==="ARENA":m.includes("JE CONTINUE")?v==="JE CONTINUE":v===current().name.toUpperCase();ok?win(20):lose("Mission secrète échouée")}}
+function renderBridge(c){let step=0,path=[Math.random()<.5?0:1,Math.random()<.5?0:1,Math.random()<.5?0:1,Math.random()<.5?0:1];c.innerHTML=`<div class="badge">ÉPREUVE 09</div><h2>🌉 Le Pont</h2><p class="sub">Quatre passages. À chaque étape, choisis gauche ou droite.</p><div id="bridgeStep" class="timer">1 / 4</div><div class="choice-grid"><button class="choice" onclick="bridge(0)">⬅️ GAUCHE</button><button class="choice" onclick="bridge(1)">DROITE ➡️</button></div><div id="bridgeRes"></div>`;window.bridge=x=>{if(x!==path[step]){lose("Tu as choisi le mauvais passage");return}step++;if(step>=4)win(30);else document.getElementById("bridgeStep").textContent=(step+1)+" / 4"}}
+function renderFinal(c){c.innerHTML=`<div class="badge">ÉPREUVE 10</div><h2>👑 FINAL</h2><p class="sub">Dernière épreuve. Trois portes. Une seule contient la sortie.</p><div class="choice-grid"><button class="choice" onclick="finalPick(1)">🔺 PORTE 1</button><button class="choice" onclick="finalPick(2)">⭕ PORTE 2</button><button class="choice" onclick="finalPick(3)">⬛ PORTE 3</button></div><div class="notice" style="margin-top:18px">Le choix final est généré à chaque partie.</div>`;let correct=1+Math.floor(Math.random()*3);window.finalPick=x=>x===correct?win(100):lose("Le Final est perdu")}
+function loginMaster(){if(document.getElementById("masterPass").value==="ARENA-MASTER"){masterLogin.classList.add("hidden");masterPanel.classList.remove("hidden");refresh();toast("🎭 Contrôle activé")}else toast("Accès refusé")}
+function renderMasterSelect(){let s=document.getElementById("masterGame");if(!s)return;s.innerHTML=games.map(g=>`<option value="${g.id}">${g.icon} ${g.name}</option>`).join("");if(state.currentGame)s.value=state.currentGame}
+async function masterOpenGame(){let id=+masterGame.value;const {error}=await sb.from("master_control").upsert({id:1,current_game_id:id,updated_at:new Date().toISOString()});if(error){toast("❌ Contrôle non synchronisé");console.error(error);return}state.currentGame=id;toast("Épreuve ouverte : "+games.find(g=>g.id===id).name)}
+async function masterClose(){const {error}=await sb.from("master_control").upsert({id:1,current_game_id:null,updated_at:new Date().toISOString()});if(error){toast("❌ Impossible de fermer");return}state.currentGame=null;toast("Épreuve fermée")}
+async function sendAnnouncement(){let msg=document.getElementById("announcement").value.trim();if(!msg)return;const {error}=await sb.from("announcements").insert({message:msg});if(error){toast("❌ Annonce non envoyée");return}state.announcement=msg;document.getElementById("announcement").value="";toast("📢 Annonce envoyée")}
+function renderPlayers(){let box=document.getElementById("players");if(!box)return;box.innerHTML=state.players.length?state.players.map(p=>`<div class="player-row"><div><b>#${p.num} — ${p.name}</b><br><small class="muted">${p.country} · ${p.points} pts · ${p.lives} vies</small></div><div class="admin-row"><span class="tag ${p.active?"":"dead"}">${p.active?"ACTIF":"ÉLIMINÉ"}</span><button class="btn red" onclick="manualEliminate('${p.id}')">ÉLIMINER</button><button class="btn secondary" onclick="giveLife('${p.id}')">+1 VIE</button></div></div>`).join(""):"<p class='muted'>Aucun participant.</p>"}
+async function manualEliminate(id){let p=state.players.find(x=>x.id===id);if(!p)return;const {error}=await sb.from("eliminations").insert({player_id:id,game_id:state.currentGame,reason:"Élimination manuelle du Maître du Jeu",points:0});if(error){toast("❌ Élimination non synchronisée");return}toast("🔴 "+p.name+" éliminé virtuellement")}
+async function giveLife(id){let p=state.players.find(x=>x.id===id);if(!p)return;const {error}=await sb.from("scores").insert({player_id:id,game_id:state.currentGame,reason:"Vie restaurée par le Maître du Jeu",points:0});if(error){toast("⚠️ Action non synchronisée");return}toast("🟢 Demande de restauration envoyée — ajoute la fonction admin dédiée dans Supabase pour appliquer +1 vie")}
+async function init(){await loadPlayers();await loadControl();subscribeRealtime();}
+init();
+</script>
+</body>
+</html>
