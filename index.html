@@ -164,6 +164,19 @@ const SUPABASE_URL="https://ntvviqcwvzaqhhgerxys.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_2wsVq1uqAItCxmrQnCWtDw_io7VcwEQ";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let state={players:[],scores:[],eliminations:[],currentPlayerId:null,announcement:"",currentGame:null,masterOpen:false};
+const gameDefinitions=[
+ {id:1,name:"1, 2, 3 Soleil",icon:"🌳",desc:"Avance sans écrire pendant le rouge.",bg:"bg-sun"},
+ {id:2,name:"Dalgona",icon:"🍪",desc:"Trouve la bonne forme.",bg:"bg-dalgona"},
+ {id:3,name:"Memory",icon:"🧠",desc:"Retrouve toutes les paires.",bg:"bg-memory"},
+ {id:4,name:"Qui est menteur ?",icon:"🎭",desc:"Trouve la déclaration mensongère.",bg:"bg-liar"},
+ {id:5,name:"Énigme",icon:"🧩",desc:"Résous l'énigme avant les autres.",bg:"bg-riddle"},
+ {id:6,name:"Duel",icon:"⚔️",desc:"Affronte un adversaire virtuel.",bg:"bg-duel"},
+ {id:7,name:"Le Choix",icon:"🎲",desc:"Choisis sans connaître la conséquence.",bg:"bg-choice"},
+ {id:8,name:"Mission secrète",icon:"🕵️",desc:"Accomplis une mission cachée.",bg:"bg-secret"},
+ {id:9,name:"Le Pont",icon:"🌉",desc:"Choisis le bon passage à chaque étape.",bg:"bg-bridge"},
+ {id:10,name:"Final",icon:"👑",desc:"La dernière épreuve.",bg:"bg-final"}
+];
+
 let playerLocalId=localStorage.getItem("arenaPlayerId")||null;
 function saveLocal(){localStorage.setItem("arenaPlayerId",playerLocalId||"");}
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2200)}
@@ -353,11 +366,11 @@ function refresh(){
  let p=current();
  if(p){accName.textContent=p.name;accNum.textContent=p.num;accLives.textContent=p.lives;accPoints.textContent=p.points;accWins.textContent=p.wins;accStatus.textContent=p.active?"🟢 PARTICIPANT ACTIF":"🔴 PARTICIPANT ÉLIMINÉ";accStatus.style.borderLeftColor=p.active?"var(--green)":"var(--red)";}
  const banner=document.getElementById("announcementBanner");if(banner)banner.textContent=state.announcement?"📢 "+state.announcement:"";
- const cur=document.getElementById("masterCurrent");if(cur)cur.textContent=state.currentGame?"Épreuve ouverte : "+(games.find(g=>g.id===state.currentGame)?.name||"#"+state.currentGame):"Aucune épreuve ouverte";
+ const cur=document.getElementById("masterCurrent");if(cur)cur.textContent=state.currentGame?"Épreuve ouverte : "+(gameDefinitions.find(g=>g.id===state.currentGame)?.name||"#"+state.currentGame):"Aucune épreuve ouverte";
  renderGames();renderPlayers();renderMasterSelect();
 }
-function renderGames(){let box=document.getElementById("gameList");if(!box)return;box.innerHTML=games.map(g=>`<div class="game"><div class="ico">${g.icon}</div><div class="info"><b>${g.name}</b><small>${g.desc}</small></div><button class="btn" onclick="startGame(${g.id})">JOUER</button></div>`).join("")}
-function startGame(id){let p=current();if(!p){show("register");return}if(!p.active){toast("🔴 Tu es éliminé.");return}let g=games.find(x=>x.id===id);state.currentGame=id;document.getElementById("game").className="screen "+g.bg+" active";document.getElementById("gameTitle").textContent=g.icon+" "+g.name;renderGame(g)}
+function renderGames(){let box=document.getElementById("gameList");if(!box)return;box.innerHTML=gameDefinitions.map(g=>`<div class="game"><div class="ico">${g.icon}</div><div class="info"><b>${g.name}</b><small>${g.desc}</small></div><button class="btn" onclick="startGame(${g.id})">JOUER</button></div>`).join("")}
+function startGame(id){let p=current();if(!p){show("register");return}if(!p.active){toast("🔴 Tu es éliminé.");return}let g=gameDefinitions.find(x=>x.id===id);state.currentGame=id;document.getElementById("game").className="screen "+g.bg+" active";document.getElementById("gameTitle").textContent=g.icon+" "+g.name;renderGame(g)}
 function leaveGame(){state.currentGame=null;show("games")}
 async function recordResult(kind,reason,points=0){let p=current();if(!p)return false;const table=kind==="win"?"scores":"eliminations";const payload={player_id:p.id,game_id:state.currentGame,reason,points:kind==="win"?Number(points||0):0};const {error}=await sb.from(table).insert(payload);if(error){console.error(error);toast("⚠️ Résultat non synchronisé : "+error.message);return false}await loadArena();return true}
 async function lose(reason="Échec de l'épreuve"){let p=current();if(!p)return;const ok=await recordResult("lose",reason,0);if(!ok)return;const after=Math.max(0,p.lives-1);toast(after>0?"🔴 "+reason+" — 1 vie perdue":"🔴 ÉLIMINATION — "+reason);setTimeout(()=>show(after>0?"account":"home"),700)}
@@ -374,14 +387,14 @@ function renderSecret(c){let missions=["Écris le mot SILENCE trois fois.","Tape
 function renderBridge(c){let step=0,path=[0,1,2,3].map(()=>Math.random()<.5?0:1);c.innerHTML=`<div class="badge">ÉPREUVE 09</div><h2>🌉 Le Pont</h2><p class="sub">Quatre passages. À chaque étape, choisis gauche ou droite.</p><div id="bridgeStep" class="timer">1 / 4</div><div class="choice-grid"><button class="choice" onclick="bridge(0)">⬅️ GAUCHE</button><button class="choice" onclick="bridge(1)">DROITE ➡️</button></div>`;window.bridge=x=>{if(x!==path[step]){lose("Tu as choisi le mauvais passage");return}step++;if(step>=4)win(30);else document.getElementById("bridgeStep").textContent=(step+1)+" / 4"}}
 function renderFinal(c){c.innerHTML=`<div class="badge">ÉPREUVE 10</div><h2>👑 FINAL</h2><p class="sub">Dernière épreuve. Trois portes. Une seule contient la sortie.</p><div class="choice-grid"><button class="choice" onclick="finalPick(1)">🔺 PORTE 1</button><button class="choice" onclick="finalPick(2)">⭕ PORTE 2</button><button class="choice" onclick="finalPick(3)">⬛ PORTE 3</button></div><div class="notice" style="margin-top:18px">Le choix final est généré à chaque partie.</div>`;let correct=1+Math.floor(Math.random()*3);window.finalPick=x=>x===correct?win(100):lose("Le Final est perdu")}
 function loginMaster(){if(document.getElementById("masterPass").value==="ARENA-MASTER"){masterLogin.classList.add("hidden");masterPanel.classList.remove("hidden");refresh();toast("🎭 Contrôle activé")}else toast("Accès refusé")}
-function renderMasterSelect(){let s=document.getElementById("masterGame");if(!s)return;s.innerHTML=games.map(g=>`<option value="${g.id}">${g.icon} ${g.name}</option>`).join("");if(state.currentGame)s.value=state.currentGame}
-async function masterOpenGame(){let id=+masterGame.value;const {error}=await sb.from("master_control").upsert({id:1,current_game_id:id,updated_at:new Date().toISOString()});if(error){toast("❌ Contrôle non synchronisé");console.error(error);return}state.currentGame=id;toast("Épreuve ouverte : "+games.find(g=>g.id===id).name);refresh()}
+function renderMasterSelect(){let s=document.getElementById("masterGame");if(!s)return;s.innerHTML=gameDefinitions.map(g=>`<option value="${g.id}">${g.icon} ${g.name}</option>`).join("");if(state.currentGame)s.value=state.currentGame}
+async function masterOpenGame(){let id=+masterGame.value;const {error}=await sb.from("master_control").upsert({id:1,current_game_id:id,updated_at:new Date().toISOString()});if(error){toast("❌ Contrôle non synchronisé");console.error(error);return}state.currentGame=id;toast("Épreuve ouverte : "+gameDefinitions.find(g=>g.id===id).name);refresh()}
 async function masterClose(){const {error}=await sb.from("master_control").upsert({id:1,current_game_id:null,updated_at:new Date().toISOString()});if(error){toast("❌ Impossible de fermer");return}state.currentGame=null;toast("Épreuve fermée");refresh()}
 async function sendAnnouncement(){let msg=document.getElementById("announcement").value.trim();if(!msg)return;const {error}=await sb.from("announcements").insert({message:msg});if(error){toast("❌ Annonce non envoyée");return}state.announcement=msg;document.getElementById("announcement").value="";await loadArena();toast("📢 Annonce envoyée")}
 function renderPlayers(){let box=document.getElementById("players");if(!box)return;box.innerHTML=state.players.length?state.players.map(p=>`<div class="player-row"><div><b>#${p.num} — ${p.name}</b><br><small class="muted">${p.country} · ${p.points} pts · ${p.lives} vies</small></div><div class="admin-row"><span class="tag ${p.active?"":"dead"}">${p.active?"ACTIF":"ÉLIMINÉ"}</span><button class="btn red" onclick="manualEliminate('${p.id}')">ÉLIMINER</button><button class="btn secondary" onclick="giveLife('${p.id}')">+1 VIE</button></div></div>`).join(""):"<p class='muted'>Aucun participant.</p>"}
 async function manualEliminate(id){let p=state.players.find(x=>x.id===id);if(!p||!p.active)return;const {error}=await sb.from("eliminations").insert({player_id:id,game_id:state.currentGame,reason:"Élimination manuelle du Maître du Jeu",points:0});if(error){toast("❌ Élimination non synchronisée");return}await loadArena();toast("🔴 "+p.name+" éliminé virtuellement")}
 async function giveLife(id){const {error}=await sb.from("eliminations").insert({player_id:id,game_id:state.currentGame,reason:"RESTORE_LIFE — Vie restaurée par le Maître du Jeu",points:0});if(error){toast("❌ Restauration non synchronisée");return}await loadArena();toast("🟢 Vie restaurée")}
-async function init(){await loadPlayers();await loadControl();subscribeRealtime();}
+async function init(){await loadArena();subscribeRealtime();}
 init();
 </script>
 </body>
